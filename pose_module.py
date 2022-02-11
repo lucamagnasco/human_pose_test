@@ -99,7 +99,7 @@ class poseDetector:
         """
         Plot pose world landmarks.
         """
-        self.mp_drawing.plot_landmarks(self.results.pose_world_landmarks, self.mp_pose.POSE_CONNECTIONS)
+        self.mpDraw.plot_landmarks(self.results.pose_world_landmarks, self.mpPose.POSE_CONNECTIONS)
 
     # todo: crear def para graficar seguimiento de angulos a partir del dataframe.
     def scatter_log(self, df):
