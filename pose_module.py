@@ -5,6 +5,7 @@ import math
 
 class poseDetector:
     def __init__(self, mode=False, upBody=False, smooth=True, detectionCon=0.3, trackCon=0.99):
+        self.mp_drawing = None
         self.mode = mode
         self.smooth = smooth
         self.upBody = upBody
@@ -16,6 +17,7 @@ class poseDetector:
         self.mpPose = mp.solutions.pose
         self.pose = self.mpPose.Pose(static_image_mode = self.mode, #if True always trys to find new detections
                                      # upBody = self.upBody, # detect only upper body
+                                     model_complexity=2,
                                      smooth_segmentation = self.smooth,
                                      min_detection_confidence = self.detectionCon, # if confid > detectionCon --> go to tracking
                                      min_tracking_confidence = self.trackCon) # if track < trackCon --> go back to detection
@@ -42,16 +44,6 @@ class poseDetector:
         if self.results.pose_landmarks:
             if draw:  # dibujar puntos y lineas
                 self.mpDraw.draw_landmarks(img, self.results.pose_landmarks, self.mpPose.POSE_CONNECTIONS)
-
-            # landmarks = self.results.pose_landmarks.landmark
-            #
-            # for i, j in zip(self.points, landmarks):
-            #     temp = temp + [j.x, j.y, j.z, j.visibility]
-            #
-            # count = 0
-            # self.point_mov_hist.loc[count] = temp
-            # count += 1
-            # self.point_mov_hist.to_csv("point_mov_hist.csv")
         return img
 
     def findPosition(self, img, draw=True):
@@ -72,7 +64,11 @@ class poseDetector:
                     cv2.circle(img, (cx, cy), 5, (255, 0, 0), cv2.FILLED)
         return self.lmlist
 
-    def findeAngle(self, img, p1, p2, p3, draw=True):
+    """z: Represents the landmark depth with the depth at the midpoint of hips being 
+    the origin, and the smaller the value the closer the landmark is to the camera. 
+    The magnitude of z uses roughly the same scale as x"""
+
+    def findAngle(self, img, p1, p2, p3, draw=True):
         """encontrar angulo entre p1, p2, p3"""
         # Get the landmarks
         x1, y1 = self.lmlist[p1][1:]  # agarrame del p1 toda la lista ignorando el primer elemento(id)
@@ -98,3 +94,16 @@ class poseDetector:
                         cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)  # formato
 
         return int(angle)
+
+    def create_landmark_graph(self):
+        """
+        Plot pose world landmarks.
+        """
+        self.mp_drawing.plot_landmarks(self.results.pose_world_landmarks, self.mp_pose.POSE_CONNECTIONS)
+
+    # todo: crear def para graficar seguimiento de angulos a partir del dataframe.
+    def scatter_log(self, df):
+        # df = main('corte_cajon_igna_310.mp4')
+        # sns.scatterplot(data=df, x='index', y='angle')
+        # plt.show()
+        pass
