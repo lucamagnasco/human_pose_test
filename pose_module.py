@@ -74,14 +74,6 @@ class poseDetector:
     the origin, and the smaller the value the closer the landmark is to the camera. 
     The magnitude of z uses roughly the same scale as x"""
 
-    def find_multiple_positions(self, list):
-        #todo:para facilitar despues appendear el df_results
-        pass
-
-    def find_multiple_angles(self, list):
-        # todo:para facilitar despues appendear el df_results
-        pass
-
     def findAngle(self, img, p1, p2, p3, draw=True):
         """encontrar angulo entre p1, p2, p3"""
         # Get the landmarks
@@ -118,4 +110,12 @@ class poseDetector:
         # df = main('corte_cajon_igna_310.mp4')
         # sns.scatterplot(data=df, x='index', y='angle')
         # plt.show()
+        pass
+
+    def find_multiple_positions(self, list):
+        #todo:para facilitar despues appendear el df_results
+        pass
+
+    def find_multiple_angles(self, list):
+        # todo:para facilitar despues appendear el df_results
         pass

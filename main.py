@@ -71,9 +71,9 @@ class Video:
                         if a not in valid_body_string:
                             raise Exception(f'Body part not added to code analysis! Only can use one of {valid_body_string}')
                         id_angle = self.detector.pose_lm_dict[a]
-                        # self.df_results = self.df_results.append(
-                        #     {f'{a}_angle': self.detector.findAngle(img, (id_angle - 2), id_angle, (id_angle + 2))}
-                        #     ,ignore_index=True)
+                        self.df_results = self.df_results.append(
+                            {f'{a}_angle': self.detector.findAngle(img, (id_angle - 2), id_angle, (id_angle + 2))}
+                            ,ignore_index=True)
 
                     # add to results foot and shoulders heights log (in  lmlist[id][2] 2 is for cy) :
                     for h in track_heights:
@@ -81,9 +81,7 @@ class Video:
                             raise Exception(f'Body part not added to code analysis! Only can use one of {valid_body_string}')
                         id_height=self.detector.pose_lm_dict[h]
                         self.df_results = self.df_results.append(
-                            {f'{h}_height': self.detector.lmlist[id_height][2],
-                             f'{a}_angle': self.detector.findAngle(img, (id_angle - 2), id_angle, (id_angle + 2))
-                             },
+                            {f'{h}_height': self.detector.lmlist[id_height][2]},
                             ignore_index=True)
 
                 if show_video:
@@ -110,7 +108,10 @@ class Video:
 if __name__ == "__main__":
     video = Video('corte_cajon_igna_310.mp4')
     video.run_analysis()
-    video.df_results
+    df = video.df_results
+    #todo: sacar VALORES nulos de df_results (dropna no sirve porque saca filas/col enteras nulas, quiero valores nomas)
+    df_final = df[df.notna()]
+    print(df_final)
 
 # TODO: observaciones: mejorar el seguimiento --> puntos inestables y al botin lo pierde ene l momento del impacto!
 ## aumentÉ trackcon
