@@ -74,6 +74,14 @@ class poseDetector:
     the origin, and the smaller the value the closer the landmark is to the camera. 
     The magnitude of z uses roughly the same scale as x"""
 
+    def find_multiple_positions(self, list):
+        #todo:para facilitar despues appendear el df_results
+        pass
+
+    def find_multiple_angles(self, list):
+        # todo:para facilitar despues appendear el df_results
+        pass
+
     def findAngle(self, img, p1, p2, p3, draw=True):
         """encontrar angulo entre p1, p2, p3"""
         # Get the landmarks
@@ -82,10 +90,8 @@ class poseDetector:
         x3, y3 = self.lmlist[p3][1:]
 
         # calculate angle
-        angle = math.degrees(math.atan2(y3 - y2, x3 - x2) -
-                             math.atan2(y1 - y2, x1 - x2))
+        angle = math.degrees(math.atan2(y3 - y2, x3 - x2) - math.atan2(y1 - y2, x1 - x2))
         # para evitar angulo neg:
-        #todo: mejorar esto
         if angle < 0:
             angle += 360
 
