@@ -8,7 +8,7 @@ import pandas as pd
 class Video:
     def __init__(self, video_path: str):
         """
-        :param video_path: (str) path of video to analyse
+        :param video_path: path of video to analyse
         Object video has poseDetector inner or nested class, and a dataframe as attribute.
         """
         self.df_results = pd.DataFrame()
@@ -22,6 +22,10 @@ class Video:
         :param track_heights:  (ls) list of body joint to track heights of.
         :return: video and dataframe.
         """
+
+        # Create detector instance:
+        self.detector = pm.poseDetector()
+        valid_body_string = self.detector.pose_lm_dict.keys()
 
         if track_angle is None:
             track_angle = ['right_knee', 'right_elbow']
@@ -40,9 +44,6 @@ class Video:
         cap = cv2.VideoCapture(self.video)
         pTime = 0
 
-        # Create detector instance:
-        self.detector = pm.poseDetector()
-
         # while True:
         while cap.isOpened():
             """ isOpened() method returns a boolean that indicates whether or not the video stream is valid"""
@@ -60,32 +61,30 @@ class Video:
                 fps = 1 / (cTime - pTime)
                 pTime = cTime  # ptime = 0 antes del while
                 # imprime fps en imagen:
-                cv2.putText(img, str(int(fps)), (70, 50), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0),
-                            3)  # (255, 0, 0) es AZUL pq cv usa BGR
+                cv2.putText(img, str(int(fps)), (70, 50), cv2.FONT_HERSHEY_SIMPLEX,
+                            3, (255, 0, 0), 3)
 
                 if len(lmlist) != 0:
-                    """lo bueno de hacerlo con objetos es que lo puedo hacer con cualquier punto"""
-                    # todo: 1.en vez de hardcodear se podria armar un diccionario para pasar del nombre al id en un for
-                    #  (no hardcodear el agregado de las columnas al dataframe)
-                    #  2.no hace falta poner los 33, poner un par y sino poner un raise error que no lo encuentra
-                    #  3.append unique value to results dataframe
-                    if "right_knee" in track_angle:
-                        self.df_results = self.df_results.append({'right_knee_angle': self.detector.findAngle(img, 24, 26, 28)},
-                                               ignore_index=True)
-                    if "right_elbow" in track_angle:
-                        self.df_results = self.df_results.append({'right_elbow_angle': self.detector.findAngle(img, 12, 14, 16)},
-                                               ignore_index=True)
+                    """lo bueno de hacerlo con objetos es que lo puedo hacer con cualquier punto. """
+                    #todo: appendear todos los valores en la misma fila (fila==frame). Por ahora pone uno en cada fila.
+                    for a in track_angle:
+                        if a not in valid_body_string:
+                            raise Exception(f'Body part not added to code analysis! Only can use one of {valid_body_string}')
+                        id_angle = self.detector.pose_lm_dict[a]
+                        # self.df_results = self.df_results.append(
+                        #     {f'{a}_angle': self.detector.findAngle(img, (id_angle - 2), id_angle, (id_angle + 2))}
+                        #     ,ignore_index=True)
 
                     # add to results foot and shoulders heights log (in  lmlist[id][2] 2 is for cy) :
-
-                    # todo:no me appendea los resultados
-                    # right foot: id = 32 &
-                    self.df_results = self.df_results.append({'right_foot_height': self.detector.lmlist[32][2]},
-                                           ignore_index=True)
-
-                    # right shoulder: id = 12
-                    self.df_results = self.df_results.append({'right_shoulder_height': self.detector.lmlist[12][2]},
-                                           ignore_index=True)
+                    for h in track_heights:
+                        if h not in valid_body_string:
+                            raise Exception(f'Body part not added to code analysis! Only can use one of {valid_body_string}')
+                        id_height=self.detector.pose_lm_dict[h]
+                        self.df_results = self.df_results.append(
+                            {f'{h}_height': self.detector.lmlist[id_height][2],
+                             f'{a}_angle': self.detector.findAngle(img, (id_angle - 2), id_angle, (id_angle + 2))
+                             },
+                            ignore_index=True)
 
                 if show_video:
                     cv2.imshow("image", img)
@@ -110,16 +109,13 @@ class Video:
 
 if __name__ == "__main__":
     video = Video('corte_cajon_igna_310.mp4')
-    video.run_analysis( show_video=False)
+    video.run_analysis()
     video.df_results
 
 # TODO: observaciones: mejorar el seguimiento --> puntos inestables y al botin lo pierde ene l momento del impacto!
 ## aumentÉ trackcon
 ## aumentÉ waitKEy
-# TODO: mediciones
-# velocidad
-# angulos
-# alturas
+# TODO: mediciones, velocidad, angulos, alturas
 
 # todo:comparar todas las patadas del mismo jugador para armar promedios --> mejorar
 # todo: comparar contra jugadores profesional y sus numeros. --> conseguir video

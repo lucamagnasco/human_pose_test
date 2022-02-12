@@ -21,18 +21,24 @@ class poseDetector:
                                      smooth_segmentation = self.smooth,
                                      min_detection_confidence = self.detectionCon, # if confid > detectionCon --> go to tracking
                                      min_tracking_confidence = self.trackCon) # if track < trackCon --> go back to detection
-        # self.points = mp.PoseLandmark
-        # self.point_mov_hist = []
-
-        # for p in self.points:
-        # print(p)
-        # x = str(p)[13:]
-        # self.point_mov_hist.append(x + "_z")
-        # self.point_mov_hist.append(x + "_y")
-        # self.point_mov_hist.append(x + "_x")
-        # self.point_mov_hist.append(x + "_vis")
-
-        # self.df = pd.DataFrame(columns=self.point_mov_hist)
+        # mediapipe id landmark dictionary (picture)
+        self.pose_lm_dict = {
+            'nose': 0,
+            'left_shoulder': 11,
+            'right_shoulder': 12,
+            'left_elbow': 13,
+            'right_elbow': 14,
+            'left_wrist': 15,
+            'right_wrist': 16,
+            'left_hip':23,
+            'right_hip': 24,
+            'left_knee': 25,
+            'right_knee': 26,
+            'left_ankle': 27,
+            'right_ankle': 28,
+            'left_foot': 31,
+            'right_foot': 32
+        }
 
     def findPose(self, img, draw=True):
         # mp needs RGB (cv2 operates with BGR) so I convert img:
