@@ -1,4 +1,3 @@
-import pandas as pd
 import cv2
 import mediapipe as mp
 import math
@@ -104,13 +103,6 @@ class poseDetector:
         Plot pose world landmarks.
         """
         self.mpDraw.plot_landmarks(self.results.pose_world_landmarks, self.mpPose.POSE_CONNECTIONS)
-
-    # todo: crear def para graficar seguimiento de angulos a partir del dataframe.
-    def scatter_log(self, df):
-        # df = main('corte_cajon_igna_310.mp4')
-        # sns.scatterplot(data=df, x='index', y='angle')
-        # plt.show()
-        pass
 
     def find_multiple_positions(self, list):
         #todo:para facilitar despues appendear el df_results
