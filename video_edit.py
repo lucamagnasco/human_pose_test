@@ -1,18 +1,17 @@
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
-
 # armo lista del resto de los cajones y los corto en un loop
-cajones_arranque = {'igna':[191, 310, 334, 343, 737,758, 797],
-                    'otro1':[63,558, 585,620, 637, 652],
-                    'otro2':[412,479,490,864, 878, 897]}
+cajones_arranque = {'igna': [191, 310, 334, 343, 737, 758, 797],
+                    'otro1': [63, 558, 585, 620, 637, 652],
+                    'otro2': [412, 479, 490, 864, 878, 897]}
 for jugador, tiempos in cajones_arranque.items():
-        for t in tiempos:
-            ffmpeg_extract_subclip("pose_videos/190124 JP DIXP Medio Scrum Cajon.mp4",
-                           t, t+5,
-                           targetname=f"pose_videos/corte_cajon_{jugador}_{t}.mp4")
-# # cajones (t = 5seg)
+    for t in tiempos:
+        ffmpeg_extract_subclip("pose_videos/190124 JP DIXP Medio Scrum Cajon.mp4",
+                               t,
+                               t + 5,  # duracion de patada: t = 5seg
+                               targetname=f"pose_videos/corte_cajon_{jugador}_{t}.mp4")
 
-## designacion si es buena o mala
+## designacion si es buena o mala para posterior analisis:
 # 1. 5:10 (igna)  - buena
 # 3. 3:11 (igna)  -
 # 4. 5:34 (igna) - medio. falta atravesar (levantar maas pie)
