@@ -2,11 +2,11 @@ import video_pose as video
 
 
 if __name__ == "__main__":
-    video = video.Video('corte_cajon_igna_310.mp4')
-    video.run_analysis(show_video=False, plot=False, waitkey=20)
+    video = video.Video('inputs/corte_cajon_igna_310.mp4')
+    video.run_analysis(show_video=True, export=True)
+    video.plot_df_results(export=True)
     df = video.df_results
-    print(df.head)
-
+    print(f'Done! Results DataFrame created: \n {df.head}')
 
 # TODO: improve tracking accuracy --> unstable points. For ex: looses cleate whtn kick impact
 # TODO: other measurements
