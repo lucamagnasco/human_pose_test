@@ -6,6 +6,27 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
+def print_results(df, track_angle, track_heights, save=False):     # todo: improve
+    """
+    Plot results from appended DataFrame
+    :param df: pd.DataFrame with appended results
+    :param track_angle: Body parts to track angle in analysis
+    :param track_heights:  Body parts to track height in analysis
+    :return: plots
+    """
+    plt.figure(figsize=(10, 10))
+    for angle in track_angle:
+        sns.scatterplot(data=df, x='index', y=angle)
+    plt.show()
+    plt.figure(figsize=(10, 10))
+    for height in track_heights:
+        sns.scatterplot(data=df, x='index', y=height)
+    plt.show()
+    if save:
+        plt.savefig('video_analysis_plots.png')
+
+
 class Video:
     def __init__(self, video_path: str):
         """
@@ -15,7 +36,7 @@ class Video:
         self.df_results = pd.DataFrame()
         self.video = video_path
 
-    def run_analysis(self, show_video=True, plot=True, track_angle=None, track_heights=None):
+    def run_analysis(self, show_video=True, plot=True, track_angle=None, track_heights=None, waitkey=120):
         """
         :param show_video: (boolean) if True (def) shows video
         :param plot: (boolean) if True (def) plots scatterplot of [track_angle]
@@ -23,7 +44,6 @@ class Video:
         :param track_heights:  (ls) list of body joint to track heights of.
         :return: video and dataframe.
         """
-
         # Create detector instance:
         self.detector = pm.poseDetector()
         valid_body_string = self.detector.pose_lm_dict.keys()
@@ -53,21 +73,20 @@ class Video:
             if frame:
                 img = self.detector.findPose(img)
 
-                # armo lista de listas con la posicion de cada pose_landmarks
+                # List landmark positions
                 lmlist = self.detector.findPosition(img)
 
-                # calcula frames by second (fps)
+                # calculates frames by second (fps)
                 cTime = time.time()
                 fps = 1 / (cTime - pTime)
                 pTime = cTime  # ptime = 0 antes del while
-                # imprime fps en imagen:
+                # draws fps on image:
                 cv2.putText(img, str(int(fps)), (70, 50), cv2.FONT_HERSHEY_SIMPLEX,
                             3, (255, 0, 0), 3)
 
-                frame_row= {}
+                frame_row = {}
 
                 if len(lmlist) != 0:
-                    """lo bueno de hacerlo con objetos es que lo puedo hacer con cualquier punto. """
                     for a in track_angle:
                         if a not in valid_body_string:
                             raise Exception(
@@ -75,42 +94,41 @@ class Video:
                         id_angle = self.detector.pose_lm_dict[a]
                         angle_value = self.detector.findAngle(img, (id_angle - 2), id_angle, (id_angle + 2))
                         frame_row[f'{a}_angle'] = angle_value
-                    # add to results foot and shoulders heights log (in  lmlist[id][2] 2 is for cy) :
+                    # add to results foot and shoulders heights log (in lmlist[id][2] 2 is for cy) :
                     for h in track_heights:
                         if h not in valid_body_string:
-                            raise Exception(f'Body part not added to code analysis! Only can use one of {valid_body_string}')
+                            raise Exception(
+                                f'Body part not added to code analysis! Only can use one of {valid_body_string}')
 
                         id_height = self.detector.pose_lm_dict[h]
                         height_value = self.detector.lmlist[id_height][2]
                         frame_row[f'{h}_height'] = angle_value
-                    #print(frame_row)
+                    # print(frame_row)
                     self.df_results = self.df_results.append(frame_row, ignore_index=True)
 
                 if show_video:
                     cv2.imshow("image", img)
-                cv2.waitKey(120)
+                cv2.waitKey(waitkey)
 
-                # todo: agregar tipito con palitos solo sobre video
+                # todo: Nice to have stick guy replicating image's human movement
                 # detector.create_landmark_graph()
 
-                # si apreto la "q" mientras corre, cierra el codigo:
+                # exit code by pressing "q" key:
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
 
-            else:  # else == si frame es false --> termina el video
+            else:  # else == if frame is false --> terminates video
                 return self.df_results
-        # Release the video capture object
+        # Release the video capture object: "Closes video file or capturing device."
         cap.release()
-        cv2.destroyAllWindows()
+
+
 
         if plot:
-            self.print_results(self.df_results,track_angle, track_heights)
+            print_results(self.df_results, track_angle, track_heights)
 
-    #todo: corregir aca
-    def print_results(self, df, track_angle, track_heights):
-        for angle in track_angle:
-            sns.scatterplot(data=df, x='index', y=angle)
-            plt.show()
-        for height in track_heights:
-            sns.scatterplot(data=df, x='index', y=height)
-            plt.show()
+        print("Run Analysis Finished.")
+        # destroy all windows at any time. It doesn’t take any parameters and doesn’t return anything.
+        cv2.destroyAllWindows()
+
+

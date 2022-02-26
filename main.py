@@ -3,12 +3,13 @@ import video_pose as video
 
 if __name__ == "__main__":
     video = video.Video('corte_cajon_igna_310.mp4')
-    video.run_analysis(show_video=False, plot=True)
+    video.run_analysis(show_video=False, plot=False, waitkey=20)
     df = video.df_results
+    print(df.head)
 
 
-# TODO: observaciones: mejorar el seguimiento --> puntos inestables y al botin lo pierde ene l momento del impacto!
-# TODO: mediciones, velocidad, angulos, alturas
-# TODO: comparar todas las patadas del mismo jugador para armar promedios --> mejorar
-# TODO: comparar contra jugadores profesional y sus numeros. --> conseguir video
-# TODO: object detection para detectar la pelota y visualizar cuando/donde (altura) impacta a la pelota.
+# TODO: improve tracking accuracy --> unstable points. For ex: looses cleate whtn kick impact
+# TODO: other measurements
+# TODO: Average multiple measurements for same player and compare to others.
+# todo: Add profesional player video to measure and compare to amateur for improvement with detected KPIs.
+# TODO: object detection for ball. Useful for video edit and for kick analysis (ex: speed/height at impact).

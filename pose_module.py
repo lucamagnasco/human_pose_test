@@ -2,24 +2,26 @@ import cv2
 import mediapipe as mp
 import math
 
+
 class poseDetector:
-    def __init__(self, mode=False, upBody=False, smooth=True, detectionCon=0.3, trackCon=0.99):
+    def __init__(self, mode=False, upbody=False, smooth=True, detection_confid=0.3, track_confid=0.99):
         self.mp_drawing = None
         self.mode = mode
         self.smooth = smooth
-        self.upBody = upBody
-        self.detectionCon = detectionCon
-        self.trackCon = trackCon
+        self.upbody = upbody
+        self.detection_confid = detection_confid
+        self.track_confid = track_confid
         self.log_angle = []
-
+        self.results = None
         self.mpDraw = mp.solutions.drawing_utils
         self.mpPose = mp.solutions.pose
-        self.pose = self.mpPose.Pose(static_image_mode = self.mode, #if True always trys to find new detections
-                                     # upBody = self.upBody, # detect only upper body
+        self.pose = self.mpPose.Pose(static_image_mode=self.mode,  # if True always trys to find new detections
+                                     #upBody = self.upBody, # detect only upper body
                                      model_complexity=2,
-                                     smooth_segmentation = self.smooth,
-                                     min_detection_confidence = self.detectionCon, # if confid > detectionCon --> go to tracking
-                                     min_tracking_confidence = self.trackCon) # if track < trackCon --> go back to detection
+                                     smooth_segmentation=self.smooth,
+                                     min_detection_confidence=self.detection_confid,  # if confid > detectionCon --> go to tracking
+                                     min_tracking_confidence=self.track_confid  # if track < trackCon --> go back to detection
+                                     )
         # mediapipe id landmark dictionary (picture)
         self.pose_lm_dict = {
             'nose': 0,
@@ -29,7 +31,7 @@ class poseDetector:
             'right_elbow': 14,
             'left_wrist': 15,
             'right_wrist': 16,
-            'left_hip':23,
+            'left_hip': 23,
             'right_hip': 24,
             'left_knee': 25,
             'right_knee': 26,
@@ -40,18 +42,28 @@ class poseDetector:
         }
 
     def findPose(self, img, draw=True):
-        # mp needs RGB (cv2 operates with BGR) so I convert img:
-        imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
+        """
+        Find landmarks and detect pose in image (video frame).
+        :param img: frame of video
+        :param draw: if True draw landmarks
+        :return: transformed img
+        """
+        imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # mp needs RGB (cv2 operates with BGR)
         # assign results to object:
         self.results = self.pose.process(imgRGB)
 
         if self.results.pose_landmarks:
-            if draw:  # dibujar puntos y lineas
+            if draw:  # draw points & lines
                 self.mpDraw.draw_landmarks(img, self.results.pose_landmarks, self.mpPose.POSE_CONNECTIONS)
         return img
 
     def findPosition(self, img, draw=True):
+        """
+        Save landmarks positions of image (video frame).
+        :param img: image or video frame
+        :param draw: if True, draws circle on each landmark
+        :return: lmlist (landmark list)
+        """
         self.lmlist = []
         if self.results.pose_landmarks:
             for id, lm in enumerate(self.results.pose_landmarks.landmark):
@@ -64,7 +76,7 @@ class poseDetector:
 
                 # To get the actual pixel values from lm ratios, we multiply X and y by w and h of img, respectively.
                 cx, cy = int(lm.x * w), int(lm.y * h)
-                self.lmlist.append([id, cx, cy])  # , lm.z]) #todo: agregar Z profundidad
+                self.lmlist.append([id, cx, cy])  # , lm.z]) #todo: add Z (depth)
                 if draw:
                     cv2.circle(img, (cx, cy), 5, (255, 0, 0), cv2.FILLED)
         return self.lmlist
@@ -74,7 +86,15 @@ class poseDetector:
     The magnitude of z uses roughly the same scale as x"""
 
     def findAngle(self, img, p1, p2, p3, draw=True):
-        """encontrar angulo entre p1, p2, p3"""
+        """
+        Find angle between three points.
+        :param img: image or video frame to analyze
+        :param p1: point number 1
+        :param p2: point number 2 (center of angle)
+        :param p3: point number 3
+        :param draw: if True, draws focused landmarks on analysed points.
+        :return: angle
+        """
         # Get the landmarks
         x1, y1 = self.lmlist[p1][1:]  # agarrame del p1 toda la lista ignorando el primer elemento(id)
         x2, y2 = self.lmlist[p2][1:]
@@ -82,7 +102,7 @@ class poseDetector:
 
         # calculate angle
         angle = math.degrees(math.atan2(y3 - y2, x3 - x2) - math.atan2(y1 - y2, x1 - x2))
-        # para evitar angulo neg:
+        # to avoid negative angle: #todo: could improve this
         if angle < 0:
             angle += 360
 
@@ -93,8 +113,8 @@ class poseDetector:
             cv2.circle(img, (x2, y2), 15, (0, 0, 255), 2)
             cv2.circle(img, (x3, y3), 5, (0, 0, 255), cv2.FILLED)
             cv2.circle(img, (x3, y3), 15, (0, 0, 255), 2)
-            cv2.putText(img, str(int(angle)), (x2 - 80, y2 + 5),      # -80 & -5 es para que tape el punto el ang
-                        cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)  # formato
+            cv2.putText(img, str(int(angle)), (x2 - 80, y2 + 5),  # -80 & -5 es para que tape el punto el ang
+                        cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)  # format
 
         return int(angle)
 
@@ -103,11 +123,3 @@ class poseDetector:
         Plot pose world landmarks.
         """
         self.mpDraw.plot_landmarks(self.results.pose_world_landmarks, self.mpPose.POSE_CONNECTIONS)
-
-    def find_multiple_positions(self, list):
-        #todo:para facilitar despues appendear el df_results
-        pass
-
-    def find_multiple_angles(self, list):
-        # todo:para facilitar despues appendear el df_results
-        pass
