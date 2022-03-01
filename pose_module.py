@@ -41,7 +41,7 @@ class poseDetector:
             'right_foot': 32
         }
 
-    def findPose(self, img, draw=True):
+    def find_pose(self, img, draw=True):
         """
         Find landmarks and detect pose in image (video frame).
         :param img: frame of video
@@ -57,7 +57,7 @@ class poseDetector:
                 self.mpDraw.draw_landmarks(img, self.results.pose_landmarks, self.mpPose.POSE_CONNECTIONS)
         return img
 
-    def findPosition(self, img, draw=True):
+    def find_position(self, img, draw=True):
         """
         Save landmarks positions of image (video frame).
         :param img: image or video frame
@@ -85,7 +85,7 @@ class poseDetector:
     the origin, and the smaller the value the closer the landmark is to the camera. 
     The magnitude of z uses roughly the same scale as x"""
 
-    def findAngle(self, img, p1, p2, p3, draw=True):
+    def find_angle(self, img, p1, p2, p3, draw=True):
         """
         Find angle between three points.
         :param img: image or video frame to analyze

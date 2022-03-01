@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-
-
 class Video:
     def __init__(self, video_path: str):
         """
@@ -56,10 +54,10 @@ class Video:
             """.read() method returns a tuple, where the first element is a boolean and the next element is the actual video frame. 
                  When the first element is True, it indicates the video stream contains a frame to read."""
             if frame:
-                img = self.detector.findPose(img)
+                img = self.detector.find_pose(img)
 
                 # List landmark positions
-                lmlist = self.detector.findPosition(img)
+                lmlist = self.detector.find_position(img)
 
                 # calculates frames by second (fps)
                 cTime = time.time()
@@ -77,7 +75,7 @@ class Video:
                             raise Exception(
                                 f"Body part not added to code analysis! Only can use one of {valid_body_string}")
                         id_angle = self.detector.pose_lm_dict[a]
-                        angle_value = self.detector.findAngle(img, (id_angle - 2), id_angle, (id_angle + 2))
+                        angle_value = self.detector.find_angle(img, (id_angle - 2), id_angle, (id_angle + 2))
                         frame_row[f'{a}_angle'] = angle_value
                     # add to results foot and shoulders heights log (in lmlist[id][2] 2 is for cy) :
                     for h in self.track_heights:
@@ -118,7 +116,7 @@ class Video:
     def plot_df_results(self, export = False):
         """
         Plot results from appended DataFrame
-        :param save: if True, save fig as png to current folder
+        :param export: if True, save fig as png to current folder
         :return: plots
         """
         df = pd.melt(self.df_results, value_vars=self.df_results.columns,ignore_index=False).rename(columns={"variable":'type'})
